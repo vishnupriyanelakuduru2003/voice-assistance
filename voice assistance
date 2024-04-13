@@ -1,0 +1,62 @@
+import speech_recognition as sr
+import pyttsx3
+import pywhatkit
+import wikipedia
+import pyjokes
+
+# Initialize text-to-speech engine
+engine = pyttsx3.init()
+
+# Set voice properties (optional)
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)  # Change index to select different voices
+
+def speak(text):
+    """Convert text to speech."""
+    engine.say(text)
+    engine.runAndWait()
+
+def take_command():
+    """Listen for user's voice command and convert it to text."""
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.pause_threshold = 1
+        audio = recognizer.listen(source)
+
+    try:
+        print("Recognizing...")
+        query = recognizer.recognize_google(audio, language='en-US')
+        print(f"User said: {query}")
+    except Exception as e:
+        print(e)
+        print("Please say that again...")
+        return "None"
+    return query
+
+def run_voice_assistant():
+    """Main function to run the voice assistant."""
+    while True:
+        query = take_command().lower()
+
+        if 'play' in query:
+            song = query.replace('play', '')
+            speak(f"Playing {song}")
+            pywhatkit.playonyt(song)
+        elif 'wikipedia' in query:
+            query = query.replace('wikipedia', '')
+            results = wikipedia.summary(query, sentences=2)
+            speak("According to Wikipedia...")
+            speak(results)
+        elif 'joke' in query:
+            joke = pyjokes.get_joke()
+            speak(joke)
+        elif 'exit' in query:
+            speak("Goodbye!")
+            break
+        else:
+            speak("Sorry, I didn't understand that.")
+
+if _name_ == "_main_":
+    speak("Hello! I am your voice assistant. How can I help you?")
+    run_voice_assistant()
